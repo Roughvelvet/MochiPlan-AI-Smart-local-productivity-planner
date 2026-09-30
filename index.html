@@ -1,0 +1,3864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#527853">
+  <title>MochiPlan AI ✨ Productividad</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            clean: ['Quicksand', 'sans-serif'],
+          },
+          colors: {
+            sage: {
+              50: '#f4f7f4',
+              100: '#e3eae3',
+              200: '#c7d5c7',
+              300: '#a9bea9',
+              500: '#527853',
+              600: '#3e5c3f',
+              700: '#304932'
+            },
+            terracotta: {
+              50: '#fdf6f0',
+              100: '#fbeadd',
+              500: '#ee7214',
+              600: '#d85a00',
+            }
+          },
+          boxShadow: {
+            clean: '0 10px 25px -5px rgba(82,120,83,.12),0 8px 10px -6px rgba(82,120,83,.08)',
+            card: '0 4px 15px -2px rgba(0,0,0,.05)',
+            floating: '0 20px 45px -15px rgba(82,120,83,.25)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, #fdfbf7 0%, #f4f7f4 50%, #f7f5f0 100%);
+      min-height: 100vh;
+      transition: background .4s ease, color .4s ease;
+    }
+
+    body.night-mode {
+      background:
+        radial-gradient(circle at top left, #1b241d 0%, #0f1410 100%);
+      color: #e3eae3;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,.90);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(227,234,227,.85);
+    }
+
+    body.night-mode .glass-card {
+      background: rgba(24,30,25,.92);
+      border-color: rgba(82,120,83,.30);
+      color: #e3eae3;
+    }
+
+    body.night-mode .light-card {
+      background: rgba(30,38,31,.9) !important;
+      color: #e3eae3 !important;
+      border-color: rgba(82,120,83,.3) !important;
+    }
+
+    body.night-mode .dark-text {
+      color: #e3eae3 !important;
+    }
+
+    body.night-mode .muted-text {
+      color: #aebaae !important;
+    }
+
+    body.night-mode input,
+    body.night-mode textarea,
+    body.night-mode select {
+      background: #182019 !important;
+      color: #e3eae3 !important;
+      border-color: #3c523e !important;
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: #c7d5c7;
+      border-radius: 20px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .dragging {
+      opacity: .45;
+      transform: scale(.98);
+    }
+
+    .drop-target {
+      border: 2px dashed #527853 !important;
+      background: #f4f7f4 !important;
+    }
+
+    .pulse-soft {
+      animation: pulseSoft 2s infinite;
+    }
+
+    @keyframes pulseSoft {
+      0%,100% { box-shadow: 0 0 0 0 rgba(82,120,83,.15); }
+      50% { box-shadow: 0 0 0 10px rgba(82,120,83,0); }
+    }
+
+    .focus-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background:
+        radial-gradient(circle at center, #f7faf7 0%, #e9f0e9 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .focus-overlay.active {
+      display: flex;
+    }
+
+    body.night-mode .focus-overlay {
+      background:
+        radial-gradient(circle at center, #1c271e 0%, #0c100d 100%);
+    }
+
+    .timer-ring {
+      filter: drop-shadow(0 8px 15px rgba(82,120,83,.18));
+    }
+
+    .progress-bar {
+      transition: width .5s ease;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 200;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: all .3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: rgba(15,20,16,.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .priority-high {
+      border-left: 4px solid #d85a00 !important;
+    }
+
+    .priority-medium {
+      border-left: 4px solid #d6a72d !important;
+    }
+
+    .priority-low {
+      border-left: 4px solid #527853 !important;
+    }
+
+    .mini-stat {
+      transition: transform .2s ease;
+    }
+
+    .mini-stat:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body id="bodyApp"
+      class="font-sans text-gray-700 antialiased p-3 md:p-6 selection:bg-sage-200 selection:text-sage-800">
+
+<div class="max-w-7xl mx-auto space-y-6">
+
+  <!-- HEADER -->
+  <header class="glass-card rounded-3xl p-5 md:p-6 shadow-clean">
+    <div class="flex flex-col xl:flex-row items-center justify-between gap-5">
+
+      <div class="flex items-center gap-4 text-center md:text-left">
+        <div class="w-14 h-14 rounded-2xl bg-sage-500 text-white flex items-center justify-center text-3xl shadow-sm">
+          🪴
+        </div>
+
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-sage-600">
+            MochiPlan AI
+          </h1>
+          <p class="text-gray-500 text-xs md:text-sm font-medium">
+            Tu pequeño centro de mando para concentrarte · IA local ✨
+          </p>
+
+          <div class="flex flex-wrap gap-2 mt-2 justify-center md:justify-start">
+            <span id="levelBadge"
+                  class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-terracotta-50 text-terracotta-600 border border-terracotta-100">
+              🌱 Nivel 1
+            </span>
+
+            <span id="streakBadge"
+                  class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-sage-50 text-sage-600 border border-sage-100">
+              🔥 Racha 0 días
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 justify-center">
+
+        <div class="bg-white/90 px-3.5 py-2 rounded-2xl border border-sage-100 text-center shadow-sm mini-stat">
+          <span class="text-[9px] uppercase font-bold text-gray-400 tracking-wider block">
+            Hora
+          </span>
+          <div id="liveClock" class="text-sm font-bold text-sage-600 font-mono">
+            --:--
+          </div>
+        </div>
+
+        <div class="bg-white/90 px-3.5 py-2 rounded-2xl border border-sage-100 text-center shadow-sm mini-stat">
+          <span class="text-[9px] uppercase font-bold text-terracotta-500 tracking-wider block">
+            Puntos
+          </span>
+          <div id="berriesDisplay" class="text-sm font-bold text-terracotta-600">
+            ⭐ 0
+          </div>
+        </div>
+
+        <div class="bg-white/90 px-3.5 py-2 rounded-2xl border border-sage-100 text-center shadow-sm mini-stat">
+          <span class="text-[9px] uppercase font-bold text-gray-400 tracking-wider block">
+            Enfoque hoy
+          </span>
+          <div id="headerFocusDisplay" class="text-sm font-bold text-sage-600">
+            0 min
+          </div>
+        </div>
+
+        <button onclick="toggleTheme()"
+                id="themeButton"
+                class="bg-sage-100 hover:bg-sage-200 text-sage-600 px-3 py-2.5 rounded-2xl shadow-sm text-xs font-semibold transition active:scale-95">
+          🌙 Tema
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+
+  <!-- MINI DASHBOARD -->
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+    <div class="glass-card rounded-2xl p-4 shadow-card mini-stat">
+      <div class="text-xl mb-1">🎯</div>
+      <div id="todayCompletedStat" class="text-xl font-extrabold text-sage-600">0/0</div>
+      <div class="text-[10px] uppercase font-bold text-gray-400">Tareas hoy</div>
+    </div>
+
+    <div class="glass-card rounded-2xl p-4 shadow-card mini-stat">
+      <div class="text-xl mb-1">⏱️</div>
+      <div id="todayFocusStat" class="text-xl font-extrabold text-sage-600">0h 00m</div>
+      <div class="text-[10px] uppercase font-bold text-gray-400">Tiempo enfocado</div>
+    </div>
+
+    <div class="glass-card rounded-2xl p-4 shadow-card mini-stat">
+      <div class="text-xl mb-1">☕</div>
+      <div id="sessionsStat" class="text-xl font-extrabold text-sage-600">0</div>
+      <div class="text-[10px] uppercase font-bold text-gray-400">Sesiones</div>
+    </div>
+
+    <div class="glass-card rounded-2xl p-4 shadow-card mini-stat">
+      <div class="text-xl mb-1">🔥</div>
+      <div id="streakStat" class="text-xl font-extrabold text-sage-600">0</div>
+      <div class="text-[10px] uppercase font-bold text-gray-400">Racha</div>
+    </div>
+
+  </section>
+
+
+  <!-- LAYOUT PRINCIPAL -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- IZQUIERDA -->
+    <div class="lg:col-span-5 space-y-6">
+
+      <!-- CHAT -->
+      <section class="glass-card rounded-3xl p-5 shadow-clean flex flex-col h-[520px]">
+
+        <div class="flex items-center justify-between pb-3 border-b border-sage-100">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🪄</span>
+            <div>
+              <h2 class="font-bold text-sage-600 text-base">
+                Planificador inteligente
+              </h2>
+              <p class="text-[9px] text-gray-400">
+                Escribe como hablarías normalmente
+              </p>
+            </div>
+          </div>
+
+          <button onclick="clearAllData()"
+                  class="text-[10px] bg-red-50 text-red-600 font-bold px-2.5 py-1.5 rounded-lg border border-red-100 hover:bg-red-100">
+            🗑️ Borrar
+          </button>
+        </div>
+
+        <div id="chatMessages"
+             class="flex-1 overflow-y-auto custom-scroll py-3 space-y-3 pr-1 text-sm">
+
+          <div class="flex gap-2 items-start">
+            <span class="text-xl p-1 bg-sage-100 rounded-full">🌱</span>
+
+            <div class="bg-white p-3.5 rounded-2xl shadow-card border border-sage-100 max-w-[90%] text-gray-700 text-xs">
+              Hola 🌱. Cuéntame qué tienes que hacer hoy y puedo convertirlo en un horario.
+              <br><br>
+              Por ejemplo:
+              <br>
+              <b>“Tengo que estudiar chino 1 hora, hacer ejercicio 45 minutos y terminar un informe.”</b>
+              <br><br>
+              También puedo detectar prioridades y dejar descansos.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <button onclick="quickPrompt('Organízame el día')"
+                  class="text-[10px] font-bold bg-sage-50 hover:bg-sage-100 text-sage-600 p-2 rounded-xl border border-sage-100">
+            ✨ Organizar día
+          </button>
+
+          <button onclick="whatShouldIDoNow()"
+                  class="text-[10px] font-bold bg-terracotta-50 hover:bg-terracotta-100 text-terracotta-600 p-2 rounded-xl border border-terracotta-100">
+            🎯 ¿Qué hago ahora?
+          </button>
+        </div>
+
+
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          <span class="text-[9px] font-bold uppercase tracking-wider text-gray-400">
+            🧠 Inteligencia local
+          </span>
+
+          <select id="energyMode"
+                  onchange="setEnergyMode(this.value)"
+                  class="text-[10px] font-bold bg-white border border-sage-200 text-sage-600 rounded-xl px-2 py-1.5">
+            <option value="normal">🌿 Normal</option>
+            <option value="low">🥱 Poca energía</option>
+            <option value="high">⚡ Mucha energía</option>
+          </select>
+
+          <button type="button"
+                  onclick="smartReplan()"
+                  class="text-[10px] font-bold bg-white hover:bg-sage-50 text-sage-600 px-2.5 py-1.5 rounded-xl border border-sage-200">
+            🧠 Autoajustar
+          </button>
+
+          <span class="text-[9px] text-gray-400 ml-auto">
+            100% local · $0
+          </span>
+        </div>
+
+        <form onsubmit="handleChatSubmit(event)"
+              class="pt-3 border-t border-sage-100 flex gap-2">
+
+          <textarea
+            id="chatInput"
+            rows="2"
+            placeholder="Ej: estudiar chino 60 min, gimnasio 45 min, almuerzo 30 min..."
+            class="flex-1 px-4 py-2.5 rounded-2xl border border-sage-200 bg-white/90 text-sm focus:outline-none focus:ring-2 focus:ring-sage-500 placeholder-gray-400 custom-scroll resize-none"></textarea>
+
+          <button
+            type="submit"
+            class="bg-sage-500 hover:bg-sage-600 text-white font-bold px-4 py-3 rounded-2xl shadow-clean transition active:scale-95 text-sm self-end">
+            ✨
+          </button>
+        </form>
+
+      </section>
+
+
+      <!-- SONIDOS -->
+      <section class="glass-card rounded-3xl p-4 shadow-clean">
+
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-xs font-bold text-sage-600 flex items-center gap-2">
+            <span>🎧</span> Sonidos de fondo
+          </h3>
+
+          <span id="ambientStatus"
+                class="text-[9px] text-gray-400">
+            Apagado
+          </span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+
+          <button onclick="playRealAmbient('rain')"
+                  id="btnRain"
+                  class="p-2.5 rounded-xl bg-sage-50 hover:bg-sage-100 border border-sage-200 text-sage-600 font-semibold transition">
+            🌧️ Lluvia
+          </button>
+
+          <button onclick="playRealAmbient('cafe')"
+                  id="btnCafe"
+                  class="p-2.5 rounded-xl bg-sage-50 hover:bg-sage-100 border border-sage-200 text-sage-600 font-semibold transition">
+            ☕ Café
+          </button>
+
+          <button onclick="playRealAmbient('fire')"
+                  id="btnFire"
+                  class="p-2.5 rounded-xl bg-sage-50 hover:bg-sage-100 border border-sage-200 text-sage-600 font-semibold transition">
+            🪵 Fuego
+          </button>
+
+        </div>
+
+        <audio id="ambientPlayer" loop></audio>
+
+      </section>
+
+
+      <!-- MODO DE CONCENTRACIÓN -->
+      <section class="glass-card rounded-3xl p-5 shadow-clean">
+
+        <div class="flex items-center justify-between mb-3">
+
+          <div>
+            <h3 class="font-bold text-sage-600 text-sm">
+              🎯 Modo de concentración
+            </h3>
+
+            <p class="text-[10px] text-gray-400">
+              Elige cómo quieres trabajar
+            </p>
+          </div>
+
+          <button onclick="requestNotifications()"
+                  class="text-[10px] bg-sage-50 border border-sage-100 text-sage-600 px-2.5 py-1.5 rounded-xl font-bold">
+            🔔 Activar avisos
+          </button>
+
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+
+          <button onclick="setFocusPreset(25,5)"
+                  class="presetBtn p-2 rounded-xl bg-white border border-sage-100 hover:bg-sage-50 text-xs font-bold">
+            25 / 5
+          </button>
+
+          <button onclick="setFocusPreset(50,10)"
+                  class="presetBtn p-2 rounded-xl bg-white border border-sage-100 hover:bg-sage-50 text-xs font-bold">
+            50 / 10
+          </button>
+
+          <button onclick="setFocusPreset(90,15)"
+                  class="presetBtn p-2 rounded-xl bg-white border border-sage-100 hover:bg-sage-50 text-xs font-bold">
+            90 / 15
+          </button>
+
+          <button onclick="openCustomTimer()"
+                  class="presetBtn p-2 rounded-xl bg-white border border-sage-100 hover:bg-sage-50 text-xs font-bold">
+            ⚙️ Personalizado
+          </button>
+
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- DERECHA -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- TEMPORIZADOR -->
+      <section class="glass-card rounded-3xl p-5 md:p-6 shadow-clean">
+
+        <div class="flex items-center justify-between mb-4">
+
+          <div>
+            <h2 class="text-lg font-bold text-sage-600 flex items-center gap-2">
+              <span>⏱️</span> Temporizador
+            </h2>
+
+            <p id="timerModeText" class="text-[10px] text-gray-400">
+              Sesión de enfoque
+            </p>
+          </div>
+
+          <span id="timerStatusBadge"
+                class="text-xs bg-sage-100 text-sage-600 px-3 py-1 rounded-full font-bold">
+            En espera
+          </span>
+
+        </div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-12 items-center gap-5">
+
+          <div class="md:col-span-5 flex justify-center">
+
+            <div class="relative w-44 h-44 flex items-center justify-center timer-ring">
+
+              <svg class="w-full h-full transform -rotate-90"
+                   viewBox="0 0 100 100">
+
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  class="text-sage-100 stroke-current"
+                  stroke-width="7"
+                  fill="transparent">
+                </circle>
+
+                <circle
+                  id="timerCircle"
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  class="text-sage-500 stroke-current transition-all duration-500 ease-linear"
+                  stroke-width="7"
+                  stroke-dasharray="264"
+                  stroke-dashoffset="264"
+                  stroke-linecap="round"
+                  fill="transparent">
+                </circle>
+
+              </svg>
+
+              <div class="absolute flex flex-col items-center">
+
+                <span id="timerText"
+                      class="text-3xl font-bold text-gray-800 dark-text font-mono">
+                  00:00
+                </span>
+
+                <span id="activeTaskName"
+                      class="text-[11px] text-sage-600 font-semibold max-w-[130px] truncate text-center mt-1">
+                  Sin tarea
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="md:col-span-7 space-y-4 text-center md:text-left">
+
+            <div>
+
+              <div class="text-[10px] uppercase tracking-wider font-bold text-gray-400">
+                Próxima tarea
+              </div>
+
+              <div id="nextTaskPreview"
+                   class="font-bold text-sage-600 mt-1">
+                —
+              </div>
+
+            </div>
+
+
+            <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+
+              <button id="btnStart"
+                      onclick="startTimer()"
+                      class="bg-sage-500 hover:bg-sage-600 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95">
+                ▶ Iniciar
+              </button>
+
+              <button id="btnPause"
+                      onclick="pauseTimer()"
+                      class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95">
+                ⏸ Pausa
+              </button>
+
+              <button onclick="resetTimer()"
+                      class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95">
+                🔄
+              </button>
+
+              <button onclick="openFocusMode()"
+                      class="bg-terracotta-500 hover:bg-terracotta-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition active:scale-95">
+                🎯 Focus Mode
+              </button>
+
+            </div>
+
+
+            <div class="bg-sage-50 rounded-2xl p-3 text-xs">
+
+              <div class="flex justify-between mb-1">
+
+                <span class="text-gray-400">
+                  Progreso
+                </span>
+
+                <span id="timerPercent"
+                      class="font-bold text-sage-600">
+                  0%
+                </span>
+
+              </div>
+
+              <div class="h-2 bg-sage-100 rounded-full overflow-hidden">
+
+                <div id="timerProgress"
+                     class="h-full bg-sage-500 rounded-full progress-bar"
+                     style="width:0%">
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ACCIONES INTELIGENTES -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+        <button onclick="whatShouldIDoNow()"
+                class="glass-card rounded-2xl p-4 text-left hover:shadow-clean transition group">
+
+          <div class="flex items-center justify-between">
+
+            <div>
+              <div class="font-bold text-sage-600 text-sm">
+                🎯 ¿Qué hago ahora?
+              </div>
+
+              <div class="text-[10px] text-gray-400 mt-1">
+                Mochi elige la siguiente tarea
+              </div>
+            </div>
+
+            <span class="text-xl group-hover:translate-x-1 transition">
+              →
+            </span>
+
+          </div>
+
+        </button>
+
+
+        <button onclick="reorganizeDay()"
+                class="glass-card rounded-2xl p-4 text-left hover:shadow-clean transition group">
+
+          <div class="flex items-center justify-between">
+
+            <div>
+              <div class="font-bold text-terracotta-600 text-sm">
+                ⚡ Reorganizar mi día
+              </div>
+
+              <div class="text-[10px] text-gray-400 mt-1">
+                Ajustar tareas atrasadas
+              </div>
+            </div>
+
+            <span class="text-xl group-hover:translate-x-1 transition">
+              →
+            </span>
+
+          </div>
+
+        </button>
+
+      </section>
+
+
+      <!-- ITINERARIO -->
+      <section class="glass-card rounded-3xl p-5 shadow-clean">
+
+        <div class="flex items-center justify-between mb-3">
+
+          <div>
+            <h2 class="text-base font-bold text-gray-800 dark-text flex items-center gap-2">
+              <span>📅</span> Itinerario de Hoy
+            </h2>
+
+            <p class="text-[10px] text-gray-400 mt-0.5">
+              Arrastra las tareas para reorganizarlas
+            </p>
+          </div>
+
+          <div class="flex gap-2">
+
+            <span id="activePlanBadge"
+                  class="text-xs bg-sage-50 text-sage-600 px-3 py-1 rounded-full font-bold border border-sage-100">
+              Sin plan
+            </span>
+
+          </div>
+
+        </div>
+
+        <div id="overloadWarning"
+             class="hidden mb-3 bg-terracotta-50 border border-terracotta-100 text-terracotta-600 p-3 rounded-2xl text-xs font-semibold">
+        </div>
+
+        <div id="timelineContainer"
+             class="space-y-2.5 max-h-[360px] overflow-y-auto custom-scroll pr-1">
+
+          <div class="text-center py-10 text-gray-400 text-xs italic bg-white/50 rounded-2xl border border-dashed border-sage-200">
+            Escribe en el chat para organizar tus tareas
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- COMPLETADAS -->
+      <section class="glass-card rounded-3xl p-5 shadow-clean">
+
+        <div class="flex items-center justify-between mb-3">
+
+          <h2 class="text-base font-bold text-gray-800 dark-text flex items-center gap-2">
+            <span>✅</span> Completadas
+          </h2>
+
+          <div class="flex items-center gap-2">
+
+            <span id="completedCounterBadge"
+                  class="text-xs bg-sage-100 text-sage-700 px-2.5 py-0.5 rounded-full font-bold">
+              0
+            </span>
+
+            <button onclick="exportSummaryCard()"
+                    class="text-xs bg-sage-500 text-white px-3 py-1 rounded-xl font-bold shadow-sm hover:bg-sage-600">
+              📄 Exportar
+            </button>
+
+          </div>
+
+        </div>
+
+        <div id="completedList"
+             class="space-y-2 max-h-[160px] overflow-y-auto custom-scroll">
+
+          <div class="text-center py-4 text-gray-400 text-xs italic">
+            Aún no hay tareas completadas.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ESTADÍSTICAS -->
+      <section class="glass-card rounded-3xl p-5 shadow-clean">
+
+        <div class="flex items-center justify-between mb-4">
+
+          <div>
+            <h2 class="text-base font-bold text-gray-800 dark-text">
+              📊 Mi productividad
+            </h2>
+
+            <p class="text-[10px] text-gray-400">
+              Tu actividad reciente
+            </p>
+          </div>
+
+          <span id="weeklyTotal"
+                class="text-xs bg-sage-100 text-sage-600 px-3 py-1 rounded-full font-bold">
+            0 min
+          </span>
+
+        </div>
+
+        <div id="weeklyChart"
+             class="grid grid-cols-7 gap-2 items-end h-32">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mt-4">
+
+          <div class="bg-sage-50 rounded-xl p-3 text-center">
+            <div id="bestDay" class="font-bold text-sage-600 text-sm">—</div>
+            <div class="text-[9px] text-gray-400">Mejor día</div>
+          </div>
+
+          <div class="bg-sage-50 rounded-xl p-3 text-center">
+            <div id="avgFocus" class="font-bold text-sage-600 text-sm">0 min</div>
+            <div class="text-[9px] text-gray-400">Promedio</div>
+          </div>
+
+          <div class="bg-sage-50 rounded-xl p-3 text-center">
+            <div id="totalCompletedWeek" class="font-bold text-sage-600 text-sm">0</div>
+            <div class="text-[9px] text-gray-400">Completadas</div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- RECURRENTES -->
+      <section class="glass-card rounded-3xl p-5 shadow-clean">
+
+        <div class="flex items-center justify-between mb-3">
+
+          <div>
+            <h2 class="text-base font-bold text-gray-800 dark-text">
+              🔄 Hábitos / tareas recurrentes
+            </h2>
+
+            <p class="text-[10px] text-gray-400">
+              Añade tareas que haces regularmente
+            </p>
+          </div>
+
+          <button onclick="openRecurringModal()"
+                  class="bg-sage-500 hover:bg-sage-600 text-white text-xs font-bold px-3 py-2 rounded-xl">
+            + Añadir
+          </button>
+
+        </div>
+
+        <div id="recurringList"
+             class="space-y-2">
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- FOCUS OVERLAY -->
+<div id="focusOverlay" class="focus-overlay">
+
+  <div class="w-full max-w-2xl px-6 text-center">
+
+    <div class="flex justify-between items-center mb-10">
+
+      <div class="text-left">
+        <div class="text-xs uppercase tracking-[.25em] text-sage-500 font-bold">
+          MODO ENFOQUE
+        </div>
+
+        <div id="focusSessionLabel"
+             class="text-xs text-gray-400 mt-1">
+          Sesión activa
+        </div>
+      </div>
+
+      <button onclick="closeFocusMode()"
+              class="bg-white/70 hover:bg-white border border-sage-100 px-4 py-2 rounded-xl text-xs font-bold text-gray-600">
+        ✕ Salir
+      </button>
+
+    </div>
+
+
+    <div class="text-6xl md:text-8xl font-mono font-bold text-sage-600 mb-5"
+         id="focusTimerText">
+      00:00
+    </div>
+
+    <div id="focusTaskName"
+         class="text-2xl md:text-3xl font-bold dark-text mb-4">
+      Sin tarea
+    </div>
+
+    <div id="focusMessage"
+         class="text-sm text-gray-400 mb-8">
+      Una cosa a la vez.
+    </div>
+
+    <div class="max-w-md mx-auto mb-8">
+
+      <div class="h-3 bg-sage-100 rounded-full overflow-hidden">
+
+        <div id="focusProgress"
+             class="h-full bg-sage-500 rounded-full progress-bar"
+             style="width:0%">
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="flex justify-center gap-3">
+
+      <button onclick="pauseTimer()"
+              class="bg-white border border-sage-200 px-5 py-3 rounded-2xl font-bold text-sm">
+        ⏸ Pausa
+      </button>
+
+      <button onclick="resetTimer()"
+              class="bg-white border border-sage-200 px-5 py-3 rounded-2xl font-bold text-sm">
+        🔄 Reiniciar
+      </button>
+
+      <button onclick="finishCurrentTaskFromFocus()"
+              class="bg-sage-500 text-white px-5 py-3 rounded-2xl font-bold text-sm">
+        ✓ Terminar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- CUSTOM TIMER MODAL -->
+<div id="customTimerModal" class="modal-backdrop">
+
+  <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-floating">
+
+    <h3 class="font-bold text-sage-600 text-lg mb-4">
+      ⚙️ Temporizador personalizado
+    </h3>
+
+    <label class="text-xs font-bold text-gray-500 block mb-1">
+      Enfoque
+    </label>
+
+    <input id="customFocusInput"
+           type="number"
+           min="1"
+           max="300"
+           value="45"
+           class="w-full border border-sage-200 rounded-xl p-3 mb-4">
+
+    <label class="text-xs font-bold text-gray-500 block mb-1">
+      Descanso
+    </label>
+
+    <input id="customBreakInput"
+           type="number"
+           min="1"
+           max="120"
+           value="10"
+           class="w-full border border-sage-200 rounded-xl p-3 mb-5">
+
+    <div class="flex gap-2">
+
+      <button onclick="closeCustomTimer()"
+              class="flex-1 bg-gray-100 rounded-xl p-3 text-xs font-bold">
+        Cancelar
+      </button>
+
+      <button onclick="saveCustomTimer()"
+              class="flex-1 bg-sage-500 text-white rounded-xl p-3 text-xs font-bold">
+        Aplicar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- RECURRING MODAL -->
+<div id="recurringModal" class="modal-backdrop">
+
+  <div class="glass-card rounded-3xl p-6 w-full max-w-md shadow-floating">
+
+    <h3 class="font-bold text-sage-600 text-lg mb-4">
+      🔄 Nueva tarea recurrente
+    </h3>
+
+    <input id="recurringTitle"
+           type="text"
+           placeholder="Ej: Estudiar chino"
+           class="w-full border border-sage-200 rounded-xl p-3 mb-3">
+
+    <input id="recurringDuration"
+           type="number"
+           min="1"
+           value="30"
+           placeholder="Duración en minutos"
+           class="w-full border border-sage-200 rounded-xl p-3 mb-3">
+
+    <select id="recurringPriority"
+            class="w-full border border-sage-200 rounded-xl p-3 mb-4">
+
+      <option value="high">🔴 Alta</option>
+      <option value="medium" selected>🟡 Media</option>
+      <option value="low">🟢 Baja</option>
+
+    </select>
+
+    <div class="flex gap-2">
+
+      <button onclick="closeRecurringModal()"
+              class="flex-1 bg-gray-100 rounded-xl p-3 text-xs font-bold">
+        Cancelar
+      </button>
+
+      <button onclick="saveRecurringTask()"
+              class="flex-1 bg-sage-500 text-white rounded-xl p-3 text-xs font-bold">
+        Guardar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- TOAST -->
+<div id="toast"
+     class="toast bg-white border border-sage-100 shadow-floating rounded-2xl px-5 py-3">
+  <div id="toastText"
+       class="text-xs font-bold text-sage-600">
+  </div>
+</div>
+
+
+<script>
+/* ============================================================
+   MOCHIPLAN AI v3 · SMART LOCAL
+   ============================================================ */
+
+const STORAGE = {
+  schedule: 'mochi_v3_schedule',
+  completed: 'mochi_v3_completed',
+  points: 'mochi_v3_points',
+  focus: 'mochi_v3_focus',
+  focusHistory: 'mochi_v3_focusHistory',
+  recurring: 'mochi_v3_recurring',
+  theme: 'mochi_v3_theme',
+  streak: 'mochi_v3_streak',
+  lastActive: 'mochi_v3_lastActive',
+  sessions: 'mochi_v3_sessions',
+  settings: 'mochi_v3_settings'
+};
+
+let activeSchedule = [];
+let proposedSchedule = [];
+let completedHistory = [];
+let recurringTasks = [];
+
+let berries = 0;
+let totalFocusMinutes = 0;
+let focusHistory = [];
+let sessionsToday = 0;
+
+let currentTask = null;
+let timerDuration = 0;
+let timerRemaining = 0;
+let timerInterval = null;
+let isTimerRunning = false;
+let targetEndTime = null;
+
+let focusPreset = {
+  focus: 50,
+  break: 10
+};
+
+let energyMode = localStorage.getItem('mochi_v3_energy') || 'normal';
+
+const SMART_DEFAULTS = {
+  normal: { maxBlock: 90, breakAfter: 60, breakMin: 10 },
+  low:    { maxBlock: 45, breakAfter: 45, breakMin: 15 },
+  high:   { maxBlock: 120, breakAfter: 90, breakMin: 10 }
+};
+
+function getSmartDefaults() {
+  return SMART_DEFAULTS[energyMode] || SMART_DEFAULTS.normal;
+}
+
+function setEnergyMode(mode) {
+  energyMode = ['normal','low','high'].includes(mode) ? mode : 'normal';
+  localStorage.setItem('mochi_v3_energy', energyMode);
+  const select = document.getElementById('energyMode');
+  if (select) select.value = energyMode;
+  showToast(
+    energyMode === 'low'
+      ? '🥱 Modo poca energía'
+      : energyMode === 'high'
+      ? '⚡ Modo alta energía'
+      : '🌿 Modo equilibrado'
+  );
+}
+
+let currentAmbient = null;
+let draggedTaskId = null;
+
+const ambientSources = {
+  rain: "https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg",
+  cafe: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
+  fire: "https://actions.google.com/sounds/v1/ambiences/fireplace.ogg"
+};
+
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function todayKey() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function formatDateKey(date) {
+  return date.toISOString().slice(0,10);
+}
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').innerText = message;
+
+  toast.classList.add('show');
+
+  clearTimeout(window.toastTimeout);
+
+  window.toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+function minutesToReadable(minutes) {
+  minutes = Math.max(0, Math.round(minutes));
+
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (h > 0) return `${h}h ${m.toString().padStart(2,'0')}m`;
+  return `${m} min`;
+}
+
+function minToTimeStr(totalMinutes) {
+  let normalized = ((totalMinutes % 1440) + 1440) % 1440;
+
+  let hours = Math.floor(normalized / 60);
+  let mins = normalized % 60;
+
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours % 12 || 12;
+
+  return `${displayHours}:${mins.toString().padStart(2,'0')} ${ampm}`;
+}
+
+function parseTimeStrToMinutes(timeStr, ampmStr) {
+
+  let parts = timeStr.split(':');
+
+  let h = parseInt(parts[0]) || 0;
+  let m = parseInt(parts[1]) || 0;
+
+  let period = ampmStr ? ampmStr.toUpperCase() : null;
+
+  if (period === 'PM' && h < 12) h += 12;
+  if (period === 'AM' && h === 12) h = 0;
+
+  if (!period && h <= 6) h += 12;
+
+  return h * 60 + m;
+}
+
+function getNowMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function priorityLabel(priority) {
+  if (priority === 'high') return '🔴 Alta';
+  if (priority === 'medium') return '🟡 Media';
+  return '🟢 Baja';
+}
+
+function priorityWeight(priority) {
+  if (priority === 'high') return 3;
+  if (priority === 'medium') return 2;
+  return 1;
+}
+
+
+/* ============================================================
+   PERSISTENCIA
+   ============================================================ */
+
+function saveData() {
+
+  localStorage.setItem(STORAGE.schedule, JSON.stringify(activeSchedule));
+  localStorage.setItem(STORAGE.completed, JSON.stringify(completedHistory));
+  localStorage.setItem(STORAGE.points, String(berries));
+  localStorage.setItem(STORAGE.focus, String(totalFocusMinutes));
+  localStorage.setItem(STORAGE.focusHistory, JSON.stringify(focusHistory));
+  localStorage.setItem(STORAGE.recurring, JSON.stringify(recurringTasks));
+  localStorage.setItem(STORAGE.streak, String(getStreak()));
+  localStorage.setItem(STORAGE.lastActive, todayKey());
+  localStorage.setItem(STORAGE.sessions, String(sessionsToday));
+}
+
+function loadSavedData() {
+
+  try {
+    activeSchedule = JSON.parse(localStorage.getItem(STORAGE.schedule)) || [];
+    completedHistory = JSON.parse(localStorage.getItem(STORAGE.completed)) || [];
+    focusHistory = JSON.parse(localStorage.getItem(STORAGE.focusHistory)) || [];
+    recurringTasks = JSON.parse(localStorage.getItem(STORAGE.recurring)) || [];
+
+    berries = parseInt(localStorage.getItem(STORAGE.points)) || 0;
+    totalFocusMinutes = parseInt(localStorage.getItem(STORAGE.focus)) || 0;
+    sessionsToday = parseInt(localStorage.getItem(STORAGE.sessions)) || 0;
+
+  } catch(e) {
+    console.error('Error cargando datos', e);
+  }
+
+  loadTheme();
+  cleanupOldHistory();
+  updateAllUI();
+}
+
+
+/* ============================================================
+   TEMA
+   ============================================================ */
+
+function toggleTheme() {
+
+  document.body.classList.toggle('night-mode');
+
+  const isNight = document.body.classList.contains('night-mode');
+
+  localStorage.setItem(
+    STORAGE.theme,
+    isNight ? 'night' : 'light'
+  );
+
+  document.getElementById('themeButton').innerText =
+    isNight ? '☀️ Tema' : '🌙 Tema';
+}
+
+function loadTheme() {
+
+  const theme = localStorage.getItem(STORAGE.theme);
+
+  if (theme === 'night') {
+    document.body.classList.add('night-mode');
+    document.getElementById('themeButton').innerText = '☀️ Tema';
+  }
+}
+
+
+/* ============================================================
+   RELOJ
+   ============================================================ */
+
+function updateClock() {
+
+  const now = new Date();
+
+  document.getElementById('liveClock').innerText =
+    now.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+
+/* ============================================================
+   NOTIFICACIONES
+   ============================================================ */
+
+async function requestNotifications() {
+
+  if (!('Notification' in window)) {
+    showToast('Tu navegador no permite notificaciones.');
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+
+  if (permission === 'granted') {
+    showToast('🔔 Notificaciones activadas');
+    new Notification('MochiPlan 🌱', {
+      body: 'Te avisaré cuando termine una sesión.'
+    });
+  } else {
+    showToast('Las notificaciones no fueron activadas.');
+  }
+}
+
+function sendNotification(title, body) {
+
+  if (
+    'Notification' in window &&
+    Notification.permission === 'granted'
+  ) {
+    new Notification(title, { body });
+  }
+}
+
+
+/* ============================================================
+   SONIDO
+   ============================================================ */
+
+function playCuteChime() {
+
+  try {
+
+    const audioCtx =
+      new (window.AudioContext || window.webkitAudioContext)();
+
+    const notes = [587.33, 659.25, 880, 1174.66];
+
+    notes.forEach((freq, idx) => {
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      const start = audioCtx.currentTime + idx * .1;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(.12, start);
+      gain.gain.exponentialRampToValueAtTime(
+        .0001,
+        start + .6
+      );
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(start);
+      osc.stop(start + .6);
+
+    });
+
+  } catch(e) {}
+}
+
+
+/* ============================================================
+   AMBIENTES
+   ============================================================ */
+
+function playRealAmbient(type) {
+
+  const player = document.getElementById('ambientPlayer');
+
+  const buttons = [
+    'btnRain',
+    'btnCafe',
+    'btnFire'
+  ];
+
+  if (currentAmbient === type) {
+
+    player.pause();
+    currentAmbient = null;
+
+    buttons.forEach(id => {
+      document.getElementById(id)
+        .classList.remove(
+          'ring-2',
+          'ring-sage-500',
+          'bg-sage-100'
+        );
+    });
+
+    document.getElementById('ambientStatus').innerText =
+      'Apagado';
+
+    return;
+  }
+
+  player.src = ambientSources[type];
+  player.volume = .35;
+
+  player.play().catch(() => {
+    showToast('Haz clic nuevamente para iniciar el sonido.');
+  });
+
+  currentAmbient = type;
+
+  buttons.forEach(id => {
+    document.getElementById(id)
+      .classList.remove(
+        'ring-2',
+        'ring-sage-500',
+        'bg-sage-100'
+      );
+  });
+
+  const map = {
+    rain: 'btnRain',
+    cafe: 'btnCafe',
+    fire: 'btnFire'
+  };
+
+  document.getElementById(map[type])
+    .classList.add(
+      'ring-2',
+      'ring-sage-500',
+      'bg-sage-100'
+    );
+
+  document.getElementById('ambientStatus').innerText =
+    type === 'rain'
+      ? '🌧️ Lluvia'
+      : type === 'cafe'
+      ? '☕ Cafetería'
+      : '🪵 Fuego';
+}
+
+
+/* ============================================================
+   PARSER INTELIGENTE LOCAL
+   ============================================================ */
+
+function detectPriority(text) {
+
+  if (/urgente|urgencia|importantísimo|hoy sí o sí|deadline|entrega/i.test(text)) {
+    return 'high';
+  }
+
+  if (/importante|prioridad|necesario|necesito/i.test(text)) {
+    return 'medium';
+  }
+
+  return 'low';
+}
+
+function detectDuration(text) {
+  let match = text.match(/(\d+(?:[.,]\d+)?)\s*(?:h|hr|hrs|hora|horas)/i);
+  if (match) {
+    return Math.round(parseFloat(match[1].replace(',', '.')) * 60);
+  }
+
+  match = text.match(/(\d+)\s*(?:min|minuto|minutos|m)\b/i);
+  if (match) return parseInt(match[1]);
+
+  if (/almuerzo|comida|cenar|desayuno/i.test(text)) return 30;
+  if (/entrenar|gimnasio|fútbol|futbol|natación|nadar|yoga/i.test(text)) return 60;
+  if (/estudiar|estudio|chino|parcial|examen/i.test(text)) return 60;
+  if (/informe|trabajo|reporte|presentación/i.test(text)) return 60;
+  if (/descanso|pausa|break/i.test(text)) return 15;
+
+  return 30;
+}
+
+function detectCategory(text) {
+  if (/estudi|chino|parcial|examen|leer|repasar/i.test(text)) return 'study';
+  if (/trabaj|informe|reporte|correo|reunión|reunion/i.test(text)) return 'work';
+  if (/gimnasio|entren|fútbol|futbol|natación|nadar|yoga|correr/i.test(text)) return 'exercise';
+  if (/almuerzo|comida|cenar|desayuno|café|cafe/i.test(text)) return 'meal';
+  if (/descanso|pausa|break|traslado/i.test(text)) return 'break';
+  return 'personal';
+}
+
+function detectFixedTime(text) {
+  const m = text.match(/\b(?:a las|a la|para las|para la)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)?\b/i);
+  if (!m) return null;
+
+  let h = parseInt(m[1]);
+  const min = parseInt(m[2] || '0');
+  const period = (m[3] || '').toLowerCase().replace(/\./g, '');
+
+  if (period === 'pm' && h < 12) h += 12;
+  if (period === 'am' && h === 12) h = 0;
+
+  // Heurística útil para español coloquial: "a las 6" => 18:00 si ya estamos en la tarde.
+  if (!period && h <= 6) h += 12;
+
+  return h * 60 + min;
+}
+
+function detectTimeWindow(text) {
+  const lower = text.toLowerCase();
+  if (/mañana|en la mañana|por la mañana/i.test(lower)) return [7 * 60, 12 * 60];
+  if (/mediodía|medio día/i.test(lower)) return [11 * 60, 14 * 60];
+  if (/tarde|en la tarde/i.test(lower)) return [14 * 60, 19 * 60];
+  if (/noche|en la noche/i.test(lower)) return [19 * 60, 22 * 60];
+  return null;
+}
+
+function normalizeSmartTitle(text) {
+  return cleanTaskTitle(text)
+    .replace(/\b(a las|a la|para las|para la)\s*\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)?\b/gi, '')
+    .replace(/\b(?:por la mañana|en la mañana|en la tarde|por la tarde|en la noche|por la noche)\b/gi, '')
+    .replace(/\b(?:hoy|mañana)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^[-,:]+/, '')
+    .replace(/[.,]+$/, '');
+}
+
+function cleanTaskTitle(text) {
+
+  return text
+    .replace(/\d+(?:\.\d+)?\s*(?:h|hora|horas|min|minutos)/gi, '')
+    .replace(/tengo que|debo|necesito|quiero|por favor/gi, '')
+    .replace(/urgente|importante|prioridad alta/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^[-,:]+/, '')
+    .replace(/[.,]+$/, '');
+}
+
+function parseNaturalLanguagePlan(prompt) {
+  const raw = String(prompt || '').trim();
+  if (!raw) return { items: [] };
+
+  const now = getNowMinutes();
+  const defaults = getSmartDefaults();
+
+  // Explicit schedule lines keep their exact times.
+  const lines = raw.split('\n').map(x => x.trim()).filter(Boolean);
+  const explicit = [];
+
+  const rangeRegex =
+    /^(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\s*[-–—aA]\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\s*[:\-–—]?\s*(.+)$/i;
+
+  lines.forEach((line, index) => {
+    const m = line.match(rangeRegex);
+    if (!m) return;
+
+    const startAmpm = (m[1].match(/(AM|PM)/i) || m[2].match(/(AM|PM)/i) || [])[0] || null;
+    const endAmpm = (m[2].match(/(AM|PM)/i) || [])[0] || startAmpm;
+
+    const startMin = parseTimeStrToMinutes(
+      m[1].replace(/(AM|PM)/i, '').trim(),
+      startAmpm
+    );
+
+    let endMin = parseTimeStrToMinutes(
+      m[2].replace(/(AM|PM)/i, '').trim(),
+      endAmpm
+    );
+
+    if (endMin <= startMin) endMin += 12 * 60;
+
+    const title = m[3].trim();
+    const category = detectCategory(title);
+    const isBreak = category === 'break' || category === 'meal';
+
+    explicit.push({
+      id: Date.now() + index,
+      title: title.charAt(0).toUpperCase() + title.slice(1),
+      type: isBreak ? 'break' : 'task',
+      category,
+      durationMin: endMin - startMin,
+      startMin,
+      endMin,
+      priority: isBreak ? 'low' : detectPriority(title),
+      completed: false,
+      flexible: false,
+      createdAt: new Date().toISOString()
+    });
+  });
+
+  if (explicit.length) {
+    return { items: explicit };
+  }
+
+  // Split natural language while preserving common multi-word phrases.
+  const parts = raw
+    .replace(/\b(y además|además|también necesito|también quiero)\b/gi, ',')
+    .split(/\n|;|,|\s+\bluego\b\s+|\s+\bdespués\b\s+|\s+\bdespues\b\s+|\s+\by también\b\s+|\s+\by luego\b\s+/i)
+    .map(x => x.trim())
+    .filter(x => x.length > 2);
+
+  // If there is only one giant sentence, try extracting known task connectors.
+  const fallbackParts = parts.length > 1 ? parts : [raw];
+
+  const items = [];
+  let cursor = Math.max(now, 7 * 60);
+
+  fallbackParts.forEach((part, idx) => {
+    let duration = detectDuration(part);
+    const category = detectCategory(part);
+    const isBreak = category === 'break' || category === 'meal';
+    const fixed = detectFixedTime(part);
+    const window = detectTimeWindow(part);
+
+    if (energyMode === 'low' && !isBreak && duration > defaults.maxBlock) {
+      duration = defaults.maxBlock;
+    }
+
+    const title = normalizeSmartTitle(part) ||
+      (isBreak ? 'Descanso' : `Tarea ${idx + 1}`);
+
+    let startMin = fixed !== null ? fixed : cursor;
+
+    if (fixed === null && window && startMin < window[0]) {
+      startMin = window[0];
+    }
+
+    // Avoid scheduling a flexible task on top of a fixed task.
+    if (fixed === null) {
+      const occupied = items
+        .filter(x => x.startMin < startMin + duration && x.endMin > startMin)
+        .sort((a,b) => a.endMin - b.endMin);
+
+      if (occupied.length) {
+        startMin = occupied[occupied.length - 1].endMin;
+      }
+    }
+
+    const item = {
+      id: Date.now() + idx,
+      title: title.charAt(0).toUpperCase() + title.slice(1),
+      type: isBreak ? 'break' : 'task',
+      category,
+      durationMin: duration,
+      startMin,
+      endMin: startMin + duration,
+      priority: isBreak ? 'low' : detectPriority(part),
+      completed: false,
+      flexible: fixed === null,
+      createdAt: new Date().toISOString()
+    };
+
+    items.push(item);
+    cursor = Math.max(cursor, item.endMin);
+  });
+
+  // Sort fixed/explicitly timed tasks into chronological order.
+  items.sort((a,b) => a.startMin - b.startMin);
+
+  // Add intelligent breaks, but don't duplicate meals/explicit breaks.
+  return {
+    items: smartInsertBreaks(items)
+  };
+}
+
+function smartInsertBreaks(items) {
+  if (!items.length) return [];
+
+  const defaults = getSmartDefaults();
+  const sorted = [...items].sort((a,b) => a.startMin - b.startMin);
+  const result = [];
+  let focusSinceBreak = 0;
+
+  sorted.forEach((item, index) => {
+    if (item.type === 'break' || item.category === 'meal') {
+      result.push(item);
+      focusSinceBreak = 0;
+      return;
+    }
+
+    if (focusSinceBreak >= defaults.breakAfter) {
+      const last = result[result.length - 1];
+      const breakStart = last ? last.endMin : item.startMin;
+      const breakItem = {
+        id: Date.now() + 5000 + index,
+        title: 'Descanso',
+        type: 'break',
+        category: 'break',
+        durationMin: defaults.breakMin,
+        startMin: breakStart,
+        endMin: breakStart + defaults.breakMin,
+        priority: 'low',
+        completed: false,
+        flexible: true,
+        createdAt: new Date().toISOString()
+      };
+      result.push(breakItem);
+      item.startMin = Math.max(item.startMin, breakItem.endMin);
+      item.endMin = item.startMin + item.durationMin;
+      focusSinceBreak = 0;
+    }
+
+    result.push(item);
+    focusSinceBreak += item.durationMin;
+
+    // Very long blocks are split conceptually by the planner through a break after them.
+    if (item.durationMin >= defaults.maxBlock) {
+      const breakItem = {
+        id: Date.now() + 7000 + index,
+        title: 'Descanso',
+        type: 'break',
+        category: 'break',
+        durationMin: defaults.breakMin,
+        startMin: item.endMin,
+        endMin: item.endMin + defaults.breakMin,
+        priority: 'low',
+        completed: false,
+        flexible: true,
+        createdAt: new Date().toISOString()
+      };
+      result.push(breakItem);
+      focusSinceBreak = 0;
+    }
+  });
+
+  // Recalculate only flexible tasks after the previous item, while preserving fixed anchors.
+  let cursor = result[0]?.startMin ?? getNowMinutes();
+  result.forEach(item => {
+    if (item.flexible) {
+      item.startMin = Math.max(item.startMin, cursor);
+      item.endMin = item.startMin + item.durationMin;
+    }
+    cursor = Math.max(cursor, item.endMin);
+  });
+
+  return result;
+}
+
+function scoreTaskForNow(task, now) {
+  if (!task || task.completed || task.type === 'break') return -Infinity;
+
+  const overdue = task.endMin < now ? 80 : 0;
+  const startsSoon = task.startMin >= now
+    ? Math.max(0, 80 - (task.startMin - now))
+    : 20;
+
+  const priority = priorityWeight(task.priority) * 100;
+  const shortBonus = task.durationMin <= getSmartDefaults().maxBlock ? 20 : -10;
+  const energyBonus =
+    energyMode === 'low' && task.durationMin <= 45 ? 40 :
+    energyMode === 'high' && task.durationMin >= 45 ? 25 : 0;
+
+  return priority + overdue + startsSoon + shortBonus + energyBonus;
+}
+
+function detectOverload() {
+  const pending = activeSchedule
+    .filter(x => !x.completed && x.type !== 'break')
+    .reduce((sum,x) => sum + x.durationMin, 0);
+
+  const remaining = Math.max(0, 22 * 60 - getNowMinutes());
+  return { pending, remaining, overloaded: pending > remaining };
+}
+
+
+
+/* ============================================================
+   CHAT
+   ============================================================ */
+
+function appendChatMessage(sender, text, isHTML = false) {
+
+  const container =
+    document.getElementById('chatMessages');
+
+  const row = document.createElement('div');
+
+  row.className =
+    `flex gap-2 items-start ${
+      sender === 'user' ? 'justify-end' : ''
+    }`;
+
+  if (sender === 'user') {
+
+    row.innerHTML = `
+      <div class="bg-sage-500 text-white p-3 rounded-2xl text-xs font-semibold max-w-[85%] whitespace-pre-wrap">
+        ${escapeHTML(text)}
+      </div>
+    `;
+
+  } else {
+
+    row.innerHTML = `
+      <span class="text-xl p-1 bg-sage-100 rounded-full">
+        🌱
+      </span>
+
+      <div class="bg-white p-3.5 rounded-2xl shadow-card border border-sage-100 max-w-[92%] text-xs">
+        ${
+          isHTML
+            ? text
+            : escapeHTML(text).replace(/\n/g,'<br>')
+        }
+      </div>
+    `;
+  }
+
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+}
+
+function quickPrompt(type) {
+
+  if (type === 'Organízame el día') {
+
+    document.getElementById('chatInput').value =
+      'Tengo que estudiar chino 60 min, hacer ejercicio 45 min, almorzar 30 min y terminar un informe importante 60 min';
+
+    document.getElementById('chatInput').focus();
+  }
+}
+
+function handleChatSubmit(e) {
+  e.preventDefault();
+
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  appendChatMessage('user', msg);
+  input.value = '';
+
+  setTimeout(() => {
+    const parsed = parseNaturalLanguagePlan(msg);
+
+    if (!parsed.items.length) {
+      appendChatMessage(
+        'ai',
+        'No pude detectar tareas todavía. Prueba: <b>“estudiar chino 90 min, almorzar 30 min y entrenar a las 6”</b>.',
+        true
+      );
+      return;
+    }
+
+    proposedSchedule = parsed.items;
+
+    const total = proposedSchedule.reduce((sum, x) => sum + x.durationMin, 0);
+    const overload = proposedSchedule
+      .filter(x => x.type !== 'break')
+      .reduce((sum, x) => sum + x.durationMin, 0);
+
+    let html = `
+      <p class="font-bold text-sage-600">✨ Mochi organizó tu día.</p>
+      <p class="text-gray-500 mt-1">
+        ${proposedSchedule.filter(x => x.type !== 'break').length} tarea(s)
+        · <b>${minutesToReadable(overload)}</b> de trabajo
+        · ${minutesToReadable(total)} incluyendo descansos.
+      </p>
+
+      <div class="bg-sage-50 p-2.5 rounded-xl text-xs space-y-1.5 font-mono mt-2 border border-sage-100">
+    `;
+
+    proposedSchedule.forEach(item => {
+      html += `
+        <div class="flex justify-between gap-3">
+          <span>
+            ${item.type === 'break' ? '☕' : '📌'}
+            ${escapeHTML(item.title)}
+          </span>
+          <span class="font-bold text-sage-600 whitespace-nowrap">
+            ${minToTimeStr(item.startMin)} - ${minToTimeStr(item.endMin)}
+          </span>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+
+    if (overload > 12 * 60) {
+      html += `
+        <div class="mt-2 bg-terracotta-50 text-terracotta-600 border border-terracotta-100 rounded-xl p-2.5">
+          ⚠️ El día quedó muy cargado. Puedes usar <b>Autoajustar</b> para repartir mejor las tareas.
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="flex flex-wrap gap-2 mt-3">
+        <button onclick="approveSchedule()"
+                class="bg-sage-500 hover:bg-sage-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm">
+          ✓ Cargar horario
+        </button>
+
+        <button onclick="smartReplan()"
+                class="bg-white border border-sage-200 text-sage-600 font-bold px-3 py-1.5 rounded-xl text-xs">
+          🧠 Autoajustar
+        </button>
+      </div>
+    `;
+
+    appendChatMessage('ai', html, true);
+  }, 180);
+}
+
+function smartReplan() {
+  const source = proposedSchedule.length
+    ? proposedSchedule
+    : activeSchedule.filter(x => !x.completed);
+
+  if (!source.length) {
+    showToast('Primero crea un plan.');
+    return;
+  }
+
+  const defaults = getSmartDefaults();
+  const now = getNowMinutes();
+
+  const tasks = source
+    .filter(x => !x.completed && x.type !== 'break')
+    .map(x => ({ ...x }));
+
+  const breaks = source.filter(x => x.type === 'break');
+
+  tasks.sort((a,b) => {
+    const priorityDiff = priorityWeight(b.priority) - priorityWeight(a.priority);
+    if (priorityDiff) return priorityDiff;
+    return a.startMin - b.startMin;
+  });
+
+  let cursor = Math.max(now, 7 * 60);
+  const rebuilt = [];
+  let focusSinceBreak = 0;
+
+  tasks.forEach((task, index) => {
+    if (energyMode === 'low') {
+      task.durationMin = Math.min(task.durationMin, defaults.maxBlock);
+    }
+
+    // Preserve fixed-ish tasks around their original time when still in the future.
+    const originalWasSoon = task.startMin >= now && task.startMin <= now + 180;
+    if (originalWasSoon) {
+      cursor = Math.max(cursor, task.startMin);
+    }
+
+    if (focusSinceBreak >= defaults.breakAfter && rebuilt.length) {
+      const last = rebuilt[rebuilt.length - 1];
+      rebuilt.push({
+        id: Date.now() + 9000 + index,
+        title: 'Descanso',
+        type: 'break',
+        category: 'break',
+        durationMin: defaults.breakMin,
+        startMin: last.endMin,
+        endMin: last.endMin + defaults.breakMin,
+        priority: 'low',
+        completed: false,
+        flexible: true,
+        createdAt: new Date().toISOString()
+      });
+      cursor = last.endMin + defaults.breakMin;
+      focusSinceBreak = 0;
+    }
+
+    task.startMin = cursor;
+    task.endMin = cursor + task.durationMin;
+    rebuilt.push(task);
+    cursor = task.endMin;
+    focusSinceBreak += task.durationMin;
+  });
+
+  proposedSchedule = rebuilt;
+  renderSmartProposal('🧠 Reorganicé el plan priorizando lo importante y evitando bloques demasiado pesados.');
+}
+
+function renderSmartProposal(message) {
+  let html = `
+    <p class="font-bold text-sage-600">${message}</p>
+    <div class="bg-sage-50 p-2.5 rounded-xl text-xs space-y-1.5 font-mono mt-2 border border-sage-100">
+  `;
+
+  proposedSchedule.forEach(item => {
+    html += `
+      <div class="flex justify-between gap-3">
+        <span>${item.type === 'break' ? '☕' : '📌'} ${escapeHTML(item.title)}</span>
+        <span class="font-bold text-sage-600 whitespace-nowrap">
+          ${minToTimeStr(item.startMin)} - ${minToTimeStr(item.endMin)}
+        </span>
+      </div>
+    `;
+  });
+
+  html += `
+    </div>
+    <button onclick="approveSchedule()"
+            class="mt-3 bg-sage-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">
+      ✓ Cargar horario
+    </button>
+  `;
+
+  appendChatMessage('ai', html, true);
+}
+
+
+/* ============================================================
+   DESCANSOS AUTOMÁTICOS
+   ============================================================ */
+
+function autoInsertBreaks(items) {
+  return smartInsertBreaks(items);
+}
+
+
+/* ============================================================
+   APROBAR PLAN
+   ============================================================ */
+
+function approveSchedule() {
+
+  activeSchedule =
+    JSON.parse(JSON.stringify(proposedSchedule));
+
+  activeSchedule.forEach(task => {
+    task.completed = false;
+  });
+
+  saveData();
+
+  renderTimeline();
+  updateAllUI();
+
+  if (activeSchedule.length) {
+    selectTaskForTimer(activeSchedule.find(x => !x.completed));
+  }
+
+  document.getElementById('activePlanBadge').innerText =
+    'Plan Activo';
+
+  confetti({
+    particleCount: 50,
+    spread: 60,
+    origin: { y: .6 }
+  });
+
+  showToast('✨ Plan cargado correctamente');
+}
+
+
+/* ============================================================
+   REORGANIZACIÓN
+   ============================================================ */
+
+function reorganizeProposedSchedule() {
+
+  proposedSchedule.sort(
+    (a,b) =>
+      priorityWeight(b.priority) -
+      priorityWeight(a.priority)
+  );
+
+  let cursor = Math.max(
+    getNowMinutes(),
+    proposedSchedule[0]?.startMin || getNowMinutes()
+  );
+
+  proposedSchedule.forEach(item => {
+
+    item.startMin = cursor;
+    item.endMin =
+      cursor + item.durationMin;
+
+    cursor = item.endMin;
+  });
+
+  appendChatMessage(
+    'ai',
+    '⚡ Reorganicé el plan colocando primero las tareas de mayor prioridad.',
+    false
+  );
+
+  handleChatSubmit({
+    preventDefault(){},
+    _internal: true
+  });
+}
+
+function reorganizeDay() {
+  const pending = activeSchedule.filter(
+    x => !x.completed && x.type !== 'break'
+  );
+
+  if (!pending.length) {
+    showToast('No tienes tareas pendientes.');
+    return;
+  }
+
+  proposedSchedule = pending.map(x => ({ ...x }));
+  smartReplan();
+
+  activeSchedule = JSON.parse(JSON.stringify(proposedSchedule));
+  saveData();
+  renderTimeline();
+  updateAllUI();
+
+  appendChatMessage(
+    'ai',
+    `⚡ Reorganicé tus ${pending.length} tareas pendientes desde ahora, respetando prioridades y tu modo de energía.`
+  );
+
+  showToast('⚡ Día reorganizado');
+}
+
+
+/* ============================================================
+   “QUÉ HAGO AHORA?”
+   ============================================================ */
+
+function whatShouldIDoNow() {
+  const now = getNowMinutes();
+
+  const pending = activeSchedule.filter(
+    x => !x.completed && x.type !== 'break'
+  );
+
+  if (!pending.length) {
+    appendChatMessage(
+      'ai',
+      '🎉 No tienes tareas pendientes. Puedes descansar o crear un nuevo plan.'
+    );
+    showToast('🎉 No hay tareas pendientes');
+    return;
+  }
+
+  const selected = [...pending]
+    .sort((a,b) => scoreTaskForNow(b, now) - scoreTaskForNow(a, now))[0];
+
+  selectTaskForTimer(selected);
+
+  const reason =
+    selected.endMin < now
+      ? 'Está atrasada, así que conviene recuperarla ahora.'
+      : selected.priority === 'high'
+      ? 'Tiene prioridad alta.'
+      : energyMode === 'low' && selected.durationMin <= 45
+      ? 'Estás en modo poca energía y es un bloque manejable.'
+      : 'Es la tarea con mejor combinación de prioridad y momento.';
+
+  appendChatMessage(
+    'ai',
+    `
+      <p class="font-bold text-sage-600">🎯 Tu siguiente misión</p>
+      <p class="mt-1 text-gray-700"><b>${escapeHTML(selected.title)}</b></p>
+      <p class="text-gray-400 mt-1">${selected.durationMin} min · ${priorityLabel(selected.priority)}</p>
+      <p class="text-gray-500 mt-1">${reason}</p>
+      <button onclick="startTimer()"
+              class="mt-2 bg-sage-500 text-white px-3 py-1.5 rounded-xl font-bold">
+        ▶ Empezar ahora
+      </button>
+    `,
+    true
+  );
+
+  showToast(`🎯 Ahora: ${selected.title}`);
+}
+
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+
+function renderTimeline() {
+
+  const container =
+    document.getElementById('timelineContainer');
+
+  container.innerHTML = '';
+
+  if (!activeSchedule.length) {
+
+    container.innerHTML = `
+      <div class="text-center py-10 text-gray-400 text-xs italic bg-white/50 rounded-2xl border border-dashed border-sage-200">
+        Escribe en el chat para organizar tus tareas
+      </div>
+    `;
+
+    return;
+  }
+
+  activeSchedule.forEach((item, index) => {
+
+    const card =
+      document.createElement('div');
+
+    const isCurrent =
+      currentTask &&
+      currentTask.id === item.id;
+
+    card.draggable = true;
+    card.dataset.id = item.id;
+
+    const priorityClass =
+      item.priority === 'high'
+        ? 'priority-high'
+        : item.priority === 'medium'
+        ? 'priority-medium'
+        : 'priority-low';
+
+    card.className =
+      `flex items-center justify-between gap-3 p-3 rounded-2xl border transition shadow-sm
+       ${priorityClass}
+       ${
+         item.completed
+           ? 'bg-gray-50 opacity-60'
+           : isCurrent
+           ? 'bg-sage-50 border-sage-300 ring-2 ring-sage-200'
+           : 'bg-white border-gray-100'
+       }`;
+
+    card.innerHTML = `
+
+      <div class="flex items-center gap-3 min-w-0">
+
+        <span class="cursor-grab text-gray-300">
+          ⋮⋮
+        </span>
+
+        <button
+          onclick="toggleCompleteTask(${item.id})"
+          class="w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition
+          ${
+            item.completed
+              ? 'bg-sage-500 border-sage-500 text-white font-bold text-xs'
+              : 'border-sage-300'
+          }">
+
+          ${item.completed ? '✓' : ''}
+
+        </button>
+
+        <div class="min-w-0">
+
+          <div class="text-xs font-bold ${
+            item.completed
+              ? 'line-through text-gray-400'
+              : 'text-gray-700'
+          }">
+
+            ${item.type === 'break' ? '☕' : '📌'}
+            ${escapeHTML(item.title)}
+
+          </div>
+
+          <div class="text-[10px] font-mono text-sage-600 font-semibold">
+
+            ${minToTimeStr(item.startMin)}
+            -
+            ${minToTimeStr(item.endMin)}
+
+            · ${item.durationMin} min
+
+          </div>
+
+          <div class="text-[9px] mt-0.5 text-gray-400">
+
+            ${priorityLabel(item.priority)}
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="flex items-center gap-1 shrink-0">
+
+        ${
+          !item.completed
+            ? `
+              <button
+                onclick="selectTaskForTimer(activeSchedule[${index}])"
+                class="px-2.5 py-1.5 text-[10px] font-bold rounded-xl ${
+                  isCurrent
+                    ? 'bg-sage-500 text-white'
+                    : 'bg-sage-100 text-sage-600'
+                }">
+
+                ${isCurrent ? '⏳' : '▶'}
+
+              </button>
+
+              <button
+                onclick="editTask(${item.id})"
+                class="px-2 py-1.5 text-[10px] bg-gray-100 rounded-xl">
+                ✏️
+              </button>
+            `
+            : `
+              <span class="text-[10px] text-sage-600 font-bold bg-sage-50 px-2 py-1 rounded-lg">
+                Completada
+              </span>
+            `
+        }
+
+      </div>
+    `;
+
+    card.addEventListener('dragstart', () => {
+      draggedTaskId = item.id;
+      card.classList.add('dragging');
+    });
+
+    card.addEventListener('dragend', () => {
+      draggedTaskId = null;
+      card.classList.remove('dragging');
+    });
+
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      card.classList.add('drop-target');
+    });
+
+    card.addEventListener('dragleave', () => {
+      card.classList.remove('drop-target');
+    });
+
+    card.addEventListener('drop', e => {
+
+      e.preventDefault();
+      card.classList.remove('drop-target');
+
+      reorderTasks(
+        draggedTaskId,
+        item.id
+      );
+    });
+
+    container.appendChild(card);
+
+  });
+
+  updateOverloadWarning();
+  updateNextTask();
+}
+
+
+/* ============================================================
+   DRAG & DROP
+   ============================================================ */
+
+function reorderTasks(fromId, toId) {
+
+  if (fromId === toId) return;
+
+  const fromIndex =
+    activeSchedule.findIndex(
+      x => x.id === fromId
+    );
+
+  const toIndex =
+    activeSchedule.findIndex(
+      x => x.id === toId
+    );
+
+  if (fromIndex < 0 || toIndex < 0) return;
+
+  const [moved] =
+    activeSchedule.splice(fromIndex, 1);
+
+  activeSchedule.splice(
+    toIndex,
+    0,
+    moved
+  );
+
+  recalculateScheduleTimes();
+
+  saveData();
+  renderTimeline();
+
+  showToast('↕️ Horario actualizado');
+}
+
+function recalculateScheduleTimes() {
+
+  if (!activeSchedule.length) return;
+
+  let cursor =
+    activeSchedule[0].startMin ||
+    getNowMinutes();
+
+  activeSchedule.forEach(item => {
+
+    item.startMin = cursor;
+
+    item.endMin =
+      cursor + item.durationMin;
+
+    cursor = item.endMin;
+  });
+}
+
+
+/* ============================================================
+   COMPLETAR
+   ============================================================ */
+
+function toggleCompleteTask(id) {
+
+  const idx =
+    activeSchedule.findIndex(
+      t => t.id === id
+    );
+
+  if (idx === -1) return;
+
+  const task =
+    activeSchedule[idx];
+
+  if (task.completed) return;
+
+  task.completed = true;
+
+  const today = todayKey();
+
+  completedHistory.unshift({
+    id: Date.now(),
+    title: task.title,
+    duration: task.durationMin,
+    time:
+      new Date().toLocaleTimeString(
+        [],
+        {
+          hour:'2-digit',
+          minute:'2-digit',
+          hour12:true
+        }
+      ),
+    date: today,
+    taskId: task.id
+  });
+
+  berries +=
+    task.type === 'break'
+      ? 2
+      : task.priority === 'high'
+      ? 20
+      : 10;
+
+  if (currentTask && currentTask.id === task.id) {
+    currentTask = null;
+  }
+
+  saveData();
+
+  updateStreak();
+  renderTimeline();
+  renderCompletedHistory();
+  updateAllUI();
+
+  playCuteChime();
+
+  confetti({
+    particleCount: 50,
+    spread: 60
+  });
+
+  sendNotification(
+    '🎉 Tarea completada',
+    `${task.title} · +${task.type === 'break' ? 2 : task.priority === 'high' ? 20 : 10} puntos`
+  );
+
+  showToast(`✓ ${task.title} completada`);
+
+  const next =
+    activeSchedule.find(
+      x => !x.completed
+    );
+
+  if (next) {
+    setTimeout(() => {
+      selectTaskForTimer(next);
+    }, 500);
+  }
+}
+
+
+/* ============================================================
+   HISTORIAL
+   ============================================================ */
+
+function renderCompletedHistory() {
+
+  const container =
+    document.getElementById('completedList');
+
+  document.getElementById(
+    'completedCounterBadge'
+  ).innerText =
+    `${completedHistory.filter(
+      x => x.date === todayKey()
+    ).length} hoy`;
+
+  container.innerHTML = '';
+
+  const today =
+    completedHistory.filter(
+      x => x.date === todayKey()
+    );
+
+  if (!today.length) {
+
+    container.innerHTML = `
+      <div class="text-center py-4 text-gray-400 text-xs italic">
+        Aún no hay tareas completadas hoy.
+      </div>
+    `;
+
+    return;
+  }
+
+  today.forEach(item => {
+
+    const div =
+      document.createElement('div');
+
+    div.className =
+      "flex justify-between items-center bg-sage-50 p-2.5 rounded-xl border border-sage-100 text-xs text-gray-700 font-medium";
+
+    div.innerHTML = `
+      <span>
+        ✓ ${escapeHTML(item.title)}
+      </span>
+
+      <span class="text-[10px] font-mono text-sage-600">
+        ${item.time}
+        · ${item.duration} min
+      </span>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+
+/* ============================================================
+   TEMPORIZADOR
+   ============================================================ */
+
+function selectTaskForTimer(task) {
+
+  if (!task || task.completed) return;
+
+  pauseTimer();
+
+  currentTask = task;
+
+  timerDuration =
+    task.durationMin * 60;
+
+  timerRemaining =
+    timerDuration;
+
+  targetEndTime = null;
+
+  document.getElementById(
+    'activeTaskName'
+  ).innerText = task.title;
+
+  document.getElementById(
+    'timerStatusBadge'
+  ).innerText =
+    `Lista: ${task.title}`;
+
+  updateTimerDisplay();
+  renderTimeline();
+}
+
+function updateTimerDisplay() {
+
+  const seconds =
+    Math.max(0, timerRemaining);
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  const secs =
+    Math.floor(seconds % 60);
+
+  const formatted =
+    `${minutes.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+
+  document.getElementById(
+    'timerText'
+  ).innerText = formatted;
+
+  document.getElementById(
+    'focusTimerText'
+  ).innerText = formatted;
+
+  const circle =
+    document.getElementById('timerCircle');
+
+  if (timerDuration > 0) {
+
+    const ratio =
+      seconds / timerDuration;
+
+    const offset =
+      264 - 264 * ratio;
+
+    circle.style.strokeDashoffset =
+      offset;
+
+    const percent =
+      Math.round((1 - ratio) * 100);
+
+    document.getElementById(
+      'timerPercent'
+    ).innerText =
+      `${percent}%`;
+
+    document.getElementById(
+      'timerProgress'
+    ).style.width =
+      `${percent}%`;
+
+    document.getElementById(
+      'focusProgress'
+    ).style.width =
+      `${percent}%`;
+  }
+
+  document.getElementById(
+    'focusTaskName'
+  ).innerText =
+    currentTask
+      ? currentTask.title
+      : 'Sin tarea';
+}
+
+function startTimer() {
+
+  if (!currentTask) {
+
+    const first =
+      activeSchedule.find(
+        x => !x.completed
+      );
+
+    if (first) {
+      selectTaskForTimer(first);
+    } else {
+      alert('Primero crea o aprueba un horario.');
+      return;
+    }
+  }
+
+  if (isTimerRunning) return;
+
+  if (timerRemaining <= 0) {
+    timerRemaining =
+      currentTask.durationMin * 60;
+  }
+
+  isTimerRunning = true;
+
+  targetEndTime =
+    Date.now() +
+    timerRemaining * 1000;
+
+  document.getElementById(
+    'timerStatusBadge'
+  ).innerText =
+    '🎯 Enfocada';
+
+  document.getElementById(
+    'btnStart'
+  ).innerText =
+    '▶ En curso';
+
+  sessionsToday++;
+
+  saveData();
+  updateAllUI();
+
+  timerInterval =
+    setInterval(() => {
+
+      const secondsLeft =
+        Math.round(
+          (targetEndTime - Date.now()) / 1000
+        );
+
+      if (secondsLeft > 0) {
+
+        const elapsed =
+          Math.max(
+            0,
+            timerRemaining - secondsLeft
+          );
+
+        if (
+          elapsed > 0 &&
+          elapsed % 60 === 0
+        ) {
+          registerFocusMinute();
+        }
+
+        timerRemaining =
+          secondsLeft;
+
+        updateTimerDisplay();
+
+      } else {
+
+        timerRemaining = 0;
+
+        updateTimerDisplay();
+
+        finishTimer();
+
+      }
+
+    }, 500);
+
+  showToast('🎯 Enfoque iniciado');
+}
+
+function pauseTimer() {
+
+  if (!isTimerRunning) return;
+
+  const elapsed =
+    Math.max(
+      0,
+      timerDuration -
+      Math.max(
+        0,
+        Math.round(
+          (targetEndTime - Date.now()) / 1000
+        )
+      )
+    );
+
+  const minutes =
+    Math.floor(elapsed / 60);
+
+  if (minutes > 0) {
+    registerFocusMinutes(minutes);
+  }
+
+  isTimerRunning = false;
+
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  if (targetEndTime) {
+
+    timerRemaining =
+      Math.max(
+        0,
+        Math.round(
+          (targetEndTime - Date.now()) / 1000
+        )
+      );
+
+    targetEndTime = null;
+  }
+
+  document.getElementById(
+    'timerStatusBadge'
+  ).innerText =
+    '⏸ Pausado';
+
+  document.getElementById(
+    'btnStart'
+  ).innerText =
+    '▶ Continuar';
+
+  updateTimerDisplay();
+  saveData();
+}
+
+function finishTimer() {
+
+  pauseTimer();
+
+  if (!currentTask) return;
+
+  const taskId =
+    currentTask.id;
+
+  playCuteChime();
+
+  sendNotification(
+    '⏰ ¡Sesión terminada!',
+    `Terminaste ${currentTask.title}`
+  );
+
+  toggleCompleteTask(taskId);
+}
+
+function resetTimer() {
+
+  pauseTimer();
+
+  if (!currentTask) return;
+
+  timerDuration =
+    currentTask.durationMin * 60;
+
+  timerRemaining =
+    timerDuration;
+
+  targetEndTime = null;
+
+  document.getElementById(
+    'timerStatusBadge'
+  ).innerText =
+    'En espera';
+
+  updateTimerDisplay();
+}
+
+function registerFocusMinute() {
+  registerFocusMinutes(1);
+}
+
+function registerFocusMinutes(minutes) {
+
+  if (!minutes || minutes <= 0) return;
+
+  totalFocusMinutes += minutes;
+
+  const date = todayKey();
+
+  let record =
+    focusHistory.find(
+      x => x.date === date
+    );
+
+  if (!record) {
+
+    record = {
+      date,
+      minutes: 0,
+      sessions: 0
+    };
+
+    focusHistory.push(record);
+  }
+
+  record.minutes += minutes;
+
+  saveData();
+
+  updateAllUI();
+}
+
+
+/* ============================================================
+   FOCUS MODE
+   ============================================================ */
+
+function openFocusMode() {
+
+  if (!currentTask) {
+    whatShouldIDoNow();
+  }
+
+  document.getElementById(
+    'focusOverlay'
+  ).classList.add('active');
+
+  document.getElementById(
+    'focusMessage'
+  ).innerText =
+    isTimerRunning
+      ? 'Mantente aquí. Una cosa a la vez.'
+      : 'Pulsa iniciar cuando estés lista.';
+}
+
+function closeFocusMode() {
+
+  document.getElementById(
+    'focusOverlay'
+  ).classList.remove('active');
+}
+
+function finishCurrentTaskFromFocus() {
+
+  if (!currentTask) return;
+
+  pauseTimer();
+
+  toggleCompleteTask(
+    currentTask.id
+  );
+
+  closeFocusMode();
+}
+
+
+/* ============================================================
+   PRESETS
+   ============================================================ */
+
+function setFocusPreset(focus, breakMinutes) {
+
+  focusPreset = {
+    focus,
+    break: breakMinutes
+  };
+
+  localStorage.setItem(
+    STORAGE.settings,
+    JSON.stringify(focusPreset)
+  );
+
+  document.getElementById(
+    'timerModeText'
+  ).innerText =
+    `${focus} min enfoque · ${breakMinutes} min descanso`;
+
+  showToast(`🎯 Modo ${focus}/${breakMinutes} activado`);
+}
+
+function openCustomTimer() {
+
+  document.getElementById(
+    'customTimerModal'
+  ).classList.add('active');
+}
+
+function closeCustomTimer() {
+
+  document.getElementById(
+    'customTimerModal'
+  ).classList.remove('active');
+}
+
+function saveCustomTimer() {
+
+  const focus =
+    parseInt(
+      document.getElementById(
+        'customFocusInput'
+      ).value
+    );
+
+  const breakTime =
+    parseInt(
+      document.getElementById(
+        'customBreakInput'
+      ).value
+    );
+
+  if (
+    !focus ||
+    !breakTime ||
+    focus < 1 ||
+    breakTime < 1
+  ) return;
+
+  setFocusPreset(
+    focus,
+    breakTime
+  );
+
+  closeCustomTimer();
+}
+
+
+/* ============================================================
+   RECURRENTES
+   ============================================================ */
+
+function openRecurringModal() {
+
+  document.getElementById(
+    'recurringModal'
+  ).classList.add('active');
+}
+
+function closeRecurringModal() {
+
+  document.getElementById(
+    'recurringModal'
+  ).classList.remove('active');
+}
+
+function saveRecurringTask() {
+
+  const title =
+    document.getElementById(
+      'recurringTitle'
+    ).value.trim();
+
+  const duration =
+    parseInt(
+      document.getElementById(
+        'recurringDuration'
+      ).value
+    );
+
+  const priority =
+    document.getElementById(
+      'recurringPriority'
+    ).value;
+
+  if (!title || !duration) return;
+
+  recurringTasks.push({
+    id: Date.now(),
+    title,
+    duration,
+    priority,
+    active: true
+  });
+
+  saveData();
+  renderRecurringTasks();
+
+  closeRecurringModal();
+
+  document.getElementById(
+    'recurringTitle'
+  ).value = '';
+
+  showToast('🔄 Tarea recurrente guardada');
+}
+
+function renderRecurringTasks() {
+
+  const container =
+    document.getElementById(
+      'recurringList'
+    );
+
+  container.innerHTML = '';
+
+  if (!recurringTasks.length) {
+
+    container.innerHTML = `
+      <div class="text-xs text-gray-400 italic">
+        No tienes tareas recurrentes todavía.
+      </div>
+    `;
+
+    return;
+  }
+
+  recurringTasks.forEach(task => {
+
+    const div =
+      document.createElement('div');
+
+    div.className =
+      'flex items-center justify-between bg-sage-50 border border-sage-100 rounded-xl p-3';
+
+    div.innerHTML = `
+
+      <div>
+
+        <div class="text-xs font-bold text-gray-700">
+          ${escapeHTML(task.title)}
+        </div>
+
+        <div class="text-[9px] text-gray-400">
+          ${task.duration} min · ${priorityLabel(task.priority)}
+        </div>
+
+      </div>
+
+      <div class="flex gap-1">
+
+        <button
+          onclick="addRecurringToToday(${task.id})"
+          class="text-[10px] bg-sage-500 text-white px-2.5 py-1.5 rounded-xl font-bold">
+          + Hoy
+        </button>
+
+        <button
+          onclick="deleteRecurring(${task.id})"
+          class="text-[10px] bg-red-50 text-red-500 px-2 py-1.5 rounded-xl">
+          🗑️
+        </button>
+
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function addRecurringToToday(id) {
+
+  const task =
+    recurringTasks.find(
+      x => x.id === id
+    );
+
+  if (!task) return;
+
+  const cursor =
+    activeSchedule.length
+      ? Math.max(
+          ...activeSchedule.map(
+            x => x.endMin
+          )
+        )
+      : getNowMinutes();
+
+  activeSchedule.push({
+
+    id: Date.now(),
+
+    title: task.title,
+
+    type: 'task',
+
+    durationMin: task.duration,
+
+    startMin: cursor,
+
+    endMin:
+      cursor + task.duration,
+
+    priority: task.priority,
+
+    completed: false,
+
+    createdAt:
+      new Date().toISOString()
+
+  });
+
+  saveData();
+
+  renderTimeline();
+  updateAllUI();
+
+  showToast(`➕ ${task.title} añadido`);
+}
+
+function deleteRecurring(id) {
+
+  recurringTasks =
+    recurringTasks.filter(
+      x => x.id !== id
+    );
+
+  saveData();
+  renderRecurringTasks();
+}
+
+
+/* ============================================================
+   EDICIÓN DE TAREAS
+   ============================================================ */
+
+function editTask(id) {
+
+  const task =
+    activeSchedule.find(
+      x => x.id === id
+    );
+
+  if (!task) return;
+
+  const title =
+    prompt(
+      'Nombre de la tarea:',
+      task.title
+    );
+
+  if (!title) return;
+
+  const duration =
+    parseInt(
+      prompt(
+        'Duración en minutos:',
+        task.durationMin
+      )
+    );
+
+  if (!duration || duration < 1) return;
+
+  task.title = title;
+  task.durationMin = duration;
+  task.endMin =
+    task.startMin + duration;
+
+  saveData();
+  renderTimeline();
+
+  showToast('✏️ Tarea actualizada');
+}
+
+
+/* ============================================================
+   SOBRECARGA
+   ============================================================ */
+
+function updateOverloadWarning() {
+
+  const warning =
+    document.getElementById(
+      'overloadWarning'
+    );
+
+  if (!activeSchedule.length) {
+    warning.classList.add('hidden');
+    return;
+  }
+
+  const pendingMinutes =
+    activeSchedule
+      .filter(x => !x.completed)
+      .reduce(
+        (sum,x) => sum + x.durationMin,
+        0
+      );
+
+  const remainingDay =
+    Math.max(0, 22 * 60 - getNowMinutes());
+
+  if (pendingMinutes > remainingDay) {
+
+    warning.classList.remove('hidden');
+
+    warning.innerHTML =
+      `⚠️ Tienes ${minutesToReadable(pendingMinutes)}
+       de tareas pendientes, pero quedan aproximadamente
+       ${minutesToReadable(remainingDay)} del día.`;
+
+  } else {
+
+    warning.classList.add('hidden');
+  }
+}
+
+
+/* ============================================================
+   SIGUIENTE TAREA
+   ============================================================ */
+
+function updateNextTask() {
+
+  const next =
+    activeSchedule.find(
+      x =>
+        !x.completed &&
+        x.type !== 'break'
+    );
+
+  document.getElementById(
+    'nextTaskPreview'
+  ).innerText =
+    next
+      ? `${next.title} · ${next.durationMin} min`
+      : 'No hay tareas pendientes';
+}
+
+
+/* ============================================================
+   ESTADÍSTICAS
+   ============================================================ */
+
+function getTodayFocusMinutes() {
+
+  const record =
+    focusHistory.find(
+      x => x.date === todayKey()
+    );
+
+  return record
+    ? record.minutes
+    : 0;
+}
+
+function getTodayCompleted() {
+
+  return completedHistory.filter(
+    x => x.date === todayKey()
+  ).length;
+}
+
+function getStreak() {
+
+  const activeDates =
+    new Set(
+      focusHistory
+        .filter(x => x.minutes > 0)
+        .map(x => x.date)
+    );
+
+  let streak = 0;
+
+  const date =
+    new Date();
+
+  while (
+    activeDates.has(
+      formatDateKey(date)
+    )
+  ) {
+
+    streak++;
+
+    date.setDate(
+      date.getDate() - 1
+    );
+  }
+
+  return streak;
+}
+
+function updateStreak() {
+
+  const streak =
+    getStreak();
+
+  document.getElementById(
+    'streakBadge'
+  ).innerText =
+    `🔥 Racha ${streak} día${streak === 1 ? '' : 's'}`;
+
+  document.getElementById(
+    'streakStat'
+  ).innerText =
+    streak;
+}
+
+function getLevel() {
+
+  return Math.floor(
+    berries / 100
+  ) + 1;
+}
+
+function updateLevel() {
+
+  document.getElementById(
+    'levelBadge'
+  ).innerText =
+    `🌱 Nivel ${getLevel()}`;
+}
+
+function renderWeeklyChart() {
+
+  const container =
+    document.getElementById(
+      'weeklyChart'
+    );
+
+  container.innerHTML = '';
+
+  const days = [];
+
+  for (let i = 6; i >= 0; i--) {
+
+    const date =
+      new Date();
+
+    date.setDate(
+      date.getDate() - i
+    );
+
+    const key =
+      formatDateKey(date);
+
+    const record =
+      focusHistory.find(
+        x => x.date === key
+      );
+
+    days.push({
+      key,
+      minutes:
+        record ? record.minutes : 0,
+      label:
+        date.toLocaleDateString(
+          'es-CO',
+          { weekday: 'short' }
+        ).slice(0,2)
+    });
+  }
+
+  const max =
+    Math.max(
+      60,
+      ...days.map(x => x.minutes)
+    );
+
+  const total =
+    days.reduce(
+      (sum,x) => sum + x.minutes,
+      0
+    );
+
+  document.getElementById(
+    'weeklyTotal'
+  ).innerText =
+    minutesToReadable(total);
+
+  days.forEach(day => {
+
+    const height =
+      Math.max(
+        5,
+        (day.minutes / max) * 100
+      );
+
+    const wrapper =
+      document.createElement('div');
+
+    wrapper.className =
+      'flex flex-col items-center justify-end h-full gap-1';
+
+    wrapper.innerHTML = `
+
+      <div class="text-[8px] text-gray-400">
+        ${day.minutes}
+      </div>
+
+      <div class="w-full max-w-[28px] bg-sage-100 rounded-t-xl flex-1 flex items-end">
+
+        <div
+          class="w-full bg-sage-500 rounded-t-xl"
+          style="height:${height}%">
+        </div>
+
+      </div>
+
+      <div class="text-[9px] font-bold text-gray-400">
+        ${day.label}
+      </div>
+    `;
+
+    container.appendChild(wrapper);
+  });
+
+  const best =
+    [...days].sort(
+      (a,b) => b.minutes - a.minutes
+    )[0];
+
+  document.getElementById(
+    'bestDay'
+  ).innerText =
+    best && best.minutes
+      ? `${best.label} · ${best.minutes}m`
+      : '—';
+
+  document.getElementById(
+    'avgFocus'
+  ).innerText =
+    `${Math.round(total / 7)} min`;
+
+  const weekStart =
+    new Date();
+
+  weekStart.setDate(
+    weekStart.getDate() - 6
+  );
+
+  const weekStartKey =
+    formatDateKey(weekStart);
+
+  const completedWeek =
+    completedHistory.filter(
+      x => x.date >= weekStartKey
+    ).length;
+
+  document.getElementById(
+    'totalCompletedWeek'
+  ).innerText =
+    completedWeek;
+}
+
+
+/* ============================================================
+   RESUMEN UI
+   ============================================================ */
+
+function updateAllUI() {
+
+  const todayFocus =
+    getTodayFocusMinutes();
+
+  const todayCompleted =
+    getTodayCompleted();
+
+  const totalTasks =
+    activeSchedule.length;
+
+  document.getElementById(
+    'berriesDisplay'
+  ).innerText =
+    `⭐ ${berries} pts`;
+
+  document.getElementById(
+    'headerFocusDisplay'
+  ).innerText =
+    `${todayFocus} min`;
+
+  document.getElementById(
+    'todayCompletedStat'
+  ).innerText =
+    `${todayCompleted}/${totalTasks}`;
+
+  document.getElementById(
+    'todayFocusStat'
+  ).innerText =
+    minutesToReadable(todayFocus);
+
+  document.getElementById(
+    'sessionsStat'
+  ).innerText =
+    sessionsToday;
+
+  updateStreak();
+  updateLevel();
+
+  renderWeeklyChart();
+  renderRecurringTasks();
+
+  if (activeSchedule.length) {
+    document.getElementById(
+      'activePlanBadge'
+    ).innerText =
+      'Plan Activo';
+  }
+
+}
+
+
+/* ============================================================
+   EXPORTAR
+   ============================================================ */
+
+function exportSummaryCard() {
+
+  const today =
+    completedHistory.filter(
+      x => x.date === todayKey()
+    );
+
+  const tasksHTML =
+    today.map(h => `
+      <li style="margin-bottom:7px;">
+        ✓ <b>${escapeHTML(h.title)}</b>
+        <span style="color:#777;">
+          (${h.time} · ${h.duration} min)
+        </span>
+      </li>
+    `).join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+
+    <head>
+      <meta charset="UTF-8">
+      <title>Resumen MochiPlan</title>
+
+      <style>
+
+        body {
+          font-family: Arial, sans-serif;
+          background:#f4f7f4;
+          padding:30px;
+        }
+
+        .card {
+          max-width:450px;
+          margin:auto;
+          background:white;
+          padding:28px;
+          border-radius:22px;
+          border:1px solid #c7d5c7;
+        }
+
+        h1 {
+          color:#3e5c3f;
+        }
+
+        .stat {
+          background:#f4f7f4;
+          padding:12px;
+          border-radius:12px;
+          margin-bottom:10px;
+        }
+
+      </style>
+    </head>
+
+    <body>
+
+      <div class="card">
+
+        <h1>🪴 MochiPlan AI</h1>
+
+        <p>
+          ${new Date().toLocaleDateString('es-CO', {
+            weekday:'long',
+            year:'numeric',
+            month:'long',
+            day:'numeric'
+          })}
+        </p>
+
+        <div class="stat">
+          🎯 Tiempo enfocado:
+          <b>${minutesToReadable(
+            getTodayFocusMinutes()
+          )}</b>
+        </div>
+
+        <div class="stat">
+          ⭐ Puntos:
+          <b>${berries}</b>
+        </div>
+
+        <h3>Completadas</h3>
+
+        <ul>
+          ${
+            tasksHTML ||
+            '<li>No hay tareas completadas hoy.</li>'
+          }
+        </ul>
+
+        <p style="
+          text-align:center;
+          color:#527853;
+          font-weight:bold;
+          margin-top:25px;">
+          🌱 Un paso a la vez.
+        </p>
+
+      </div>
+
+    </body>
+    </html>
+  `;
+
+  const blob =
+    new Blob(
+      [html],
+      {type:'text/html'}
+    );
+
+  const url =
+    URL.createObjectURL(blob);
+
+  const a =
+    document.createElement('a');
+
+  a.href = url;
+  a.download =
+    `mochiplan-${todayKey()}.html`;
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+  showToast('📄 Resumen exportado');
+}
+
+
+/* ============================================================
+   LIMPIEZA DEL HISTORIAL
+   ============================================================ */
+
+function cleanupOldHistory() {
+
+  const limit =
+    new Date();
+
+  limit.setDate(
+    limit.getDate() - 90
+  );
+
+  const limitKey =
+    formatDateKey(limit);
+
+  completedHistory =
+    completedHistory.filter(
+      x => x.date >= limitKey
+    );
+
+  focusHistory =
+    focusHistory.filter(
+      x => x.date >= limitKey
+    );
+}
+
+
+/* ============================================================
+   BORRADO SEGURO
+   ============================================================ */
+
+function clearAllData() {
+
+  const confirmed =
+    confirm(
+      '¿Quieres borrar todos los datos de MochiPlan? Esta acción no se puede deshacer.'
+    );
+
+  if (!confirmed) return;
+
+  Object.values(STORAGE)
+    .forEach(key =>
+      localStorage.removeItem(key)
+    );
+
+  activeSchedule = [];
+  completedHistory = [];
+  recurringTasks = [];
+  focusHistory = [];
+
+  berries = 0;
+  totalFocusMinutes = 0;
+  sessionsToday = 0;
+
+  pauseTimer();
+
+  location.reload();
+}
+
+
+/* ============================================================
+   DETECTAR CAMBIO DE PESTAÑA
+   ============================================================ */
+
+document.addEventListener(
+  'visibilitychange',
+  () => {
+
+    if (
+      document.visibilityState === 'visible' &&
+      isTimerRunning &&
+      targetEndTime
+    ) {
+
+      const secondsLeft =
+        Math.round(
+          (targetEndTime - Date.now()) / 1000
+        );
+
+      if (secondsLeft <= 0) {
+
+        timerRemaining = 0;
+
+        updateTimerDisplay();
+
+        finishTimer();
+
+      } else {
+
+        timerRemaining =
+          secondsLeft;
+
+        updateTimerDisplay();
+      }
+    }
+  }
+);
+
+
+/* ============================================================
+   CARGAR AJUSTES
+   ============================================================ */
+
+function loadSettings() {
+
+  try {
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE.settings
+        )
+      );
+
+    if (saved) {
+      focusPreset = saved;
+    }
+
+  } catch(e) {}
+
+  document.getElementById(
+    'timerModeText'
+  ).innerText =
+    `${focusPreset.focus} min enfoque · ${focusPreset.break} min descanso`;
+}
+
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+
+loadSavedData();
+loadSettings();
+
+const energySelect = document.getElementById('energyMode');
+if (energySelect) energySelect.value = energyMode;
+
+if (activeSchedule.length) {
+
+  const first =
+    activeSchedule.find(
+      x => !x.completed
+    );
+
+  if (first) {
+    selectTaskForTimer(first);
+  }
+}
+
+renderTimeline();
+renderCompletedHistory();
+renderRecurringTasks();
+updateAllUI();
+
+</script>
+
+</body>
+</html>
